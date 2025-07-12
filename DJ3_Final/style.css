@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.axis path,
+.axis line {
+  stroke: #ccc;
+}
+
+.axis text {
+  font-size: 12px;
+}
+
+.barChartFilters select {
+  margin-right: 20px;
+}
+
+#dashboard {
+  display: flex;
+  gap: 50px;
+  flex-wrap: wrap;
+}
+
+#tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(32, 33, 41, 0.8);
+  color: white;
+  font-weight: lighter;
+  padding: 2px 4px;
+  font-size: 14px;
+}
+
+svg {
+  width: 100%;
+  height: 400px;
+}
+
+.seperateTitleControls {
+  width: 100%;
+}

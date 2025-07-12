@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>COVID-19 Variant Survival</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+  <div id="dashboard">
+    <div class=seperateTitleControls>
+      <h1>Global COVID-19 Variant Survival & Mortalities Dashboard</h1>
+      <div class="selectionControls">
+        <label for="countrySelection">Select Country:</label>
+        <select id="countrySelection"></select>
+        <label for="dataTypeSelection">Select Type Of Data:</label>
+        <select id="dataTypeSelection">
+          <option value="mortality_rate">Mortaility Rate</option>
+          <option value="duration">Lifespan</option>
+        </select>
+        <label for="variantSelection">Select Variant:</label>
+        <select id="variantSelection"></select>
+      </div>
+    </div>
+
+    <div class=chartContainer>
+      <svg id="barChartSVG"></svg>
+      <div id="tooltip"></div>
+    </div>
+    <div class=chartContainer>
+      <svg id="scatterplotSVG"></svg>
+      <div id="tooltip2"></div>
+    </div>
+    <div class=chartContainer>
+      <svg id="heatMapSVG"></svg>
+      <div id="tooltip3"></div>
+    </div>
+    <script src="script.js"></script>
+  </div>
+</body>
+
+</html>
