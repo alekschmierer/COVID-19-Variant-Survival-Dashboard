@@ -50,6 +50,5 @@ The three visualizations are **interconnected**, allowing users to explore patte
 
 Because this project loads a CSV file using `d3.csv()`, it must be run from a local web server (not directly opened as a file).
 
-### Option 1: Python HTTP Server
-### Option 2: Install the "Live Server" extension in VSCode
+### Option : Install the "Live Server" extension in VSCode
 
