@@ -1,10 +1,10 @@
-# 🌍 COVID-19 Variant Survival Dashboard
+# COVID-19 Variant Survival Dashboard
 
 A dynamic, interactive dashboard that visualizes survival and mortality data of global COVID-19 variants using D3.js. This tool allows users to explore country-specific variant data.
 
 🔗 **[Live Demo on Replit](https://replit.com/@gaze4beam/FinalProjectREVISED)**
 
-## 🔍 Project Overview
+## Project Overview
 
 This project visualizes cleaned COVID-19 variant data using:
 
@@ -14,7 +14,7 @@ This project visualizes cleaned COVID-19 variant data using:
 
 The three visualizations are **interconnected**, allowing users to explore patterns across countries and variants with intuitive controls and responsive filtering.
 
-## 💡 Features
+## Features
 
 - **Country Filter** – Select any country to view variant-specific statistics
 - **Data Type Toggle** – Choose between "Mortality Rate" or "Lifespan"
@@ -22,7 +22,7 @@ The three visualizations are **interconnected**, allowing users to explore patte
 - **Linked Interactions** – Clicking a bar updates scatter plot and heat map
 - **Tooltips** – Hover for contextual details in each chart
 
-## 📊 Visualizations
+## Visualizations
 
 | Visualization   | Description |
 |-----------------|-------------|
@@ -30,7 +30,7 @@ The three visualizations are **interconnected**, allowing users to explore patte
 | **Scatter Plot**| Shows total deaths vs. selected data type (mortality or lifespan) |
 | **Heat Map**    | Visualizes 5 metrics across selected country’s variants |
 
-## ⚙️ Technologies Used
+## Technologies 
 
 ### Frontend:
 - **HTML5**
@@ -46,7 +46,7 @@ The three visualizations are **interconnected**, allowing users to explore patte
 
 > Data was preprocessed and cleaned in Python, then exported to CSV for visualization.
 
-## 🖥️ Running Locally
+## Running Locally
 
 Because this project loads a CSV file using `d3.csv()`, it must be run from a local web server (not directly opened as a file).
 
