@@ -2,8 +2,6 @@
 
 A dynamic, interactive dashboard that visualizes survival and mortality data of global COVID-19 variants using D3.js. This tool allows users to explore country-specific variant data.
 
-🔗 **[Live Demo on Replit](https://replit.com/@gaze4beam/FinalProjectREVISED)**
-
 ## Project Overview
 
 This project visualizes cleaned COVID-19 variant data using:
