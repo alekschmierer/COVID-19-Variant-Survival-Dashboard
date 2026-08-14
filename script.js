@@ -1,3 +1,35 @@
+//The palette lives in style.css and is read back here, so there is one copy of
+//it rather than two that drift apart.
+const cssTokens = getComputedStyle(document.documentElement);
+const token = (name) => cssTokens.getPropertyValue(name).trim();
+
+const theme = {
+  series1: token("--series-1"),
+  muted: token("--text-muted"),
+  surface: token("--surface"),
+  metricHues: [
+    token("--metric-1"),
+    token("--metric-2"),
+    token("--metric-3"),
+    token("--metric-4"),
+    token("--metric-5"),
+  ],
+};
+
+/* A sequential ramp for a dark surface has to run dark -> bright. The usual
+   light -> dark ramps invert here: the largest values sink into the background
+   and the smallest ones glow, which is the reading backwards.
+
+   Built in Lab from the row's own hue so lightness climbs monotonically and the
+   top of the ramp lands exactly on the validated categorical step — the colour
+   a full-strength cell is meant to read as. The bottom keeps a trace of the hue
+   rather than going neutral, so a near-zero cell still belongs to its row. */
+function darkRamp(hex) {
+  const top = d3.lab(hex);
+  const bottom = d3.lab(18, top.a * 0.3, top.b * 0.3);
+  return d3.interpolateLab(bottom, top);
+}
+
 //Load CSV file using d3.csv
 d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
   //Define margin convention
@@ -6,26 +38,28 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
   const margin = { top: 20, right: 20, bottom: 100, left: 80 };
 
   //Create SVG and Group
-  const barSvg = d3
-    .select("#barChartSVG")
-    .attr("width", width)
-    .attr("height", height);
+  //Every chart is drawn against a fixed 400x400 user space, but the CSS
+  //stretches the SVG to fill its column. Without a viewBox the user space is
+  //1:1 with rendered pixels, so the drawing stays 400 units wide and the rest
+  //of the element is dead space. The viewBox maps those 400 units onto
+  //whatever width the element actually gets.
+  const setUpSvg = (selector) =>
+    d3
+      .select(selector)
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const barSvg = setUpSvg("#barChartSVG");
   const barChartGroup = barSvg
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const scatterplotSVG = d3
-    .select("#scatterplotSVG")
-    .attr("width", width)
-    .attr("height", height);
+  const scatterplotSVG = setUpSvg("#scatterplotSVG");
   const scatterPlotGroup = scatterplotSVG
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  const heatMapSvg = d3
-    .select("#heatMapSVG")
-    .attr("width", width)
-    .attr("height", height);
+  const heatMapSvg = setUpSvg("#heatMapSVG");
   const heatMapGroup = heatMapSvg
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -145,7 +179,11 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
     barChartGroup.append("g").attr("class", "y-axis").call(yAxis);
 
     // Use enter-update pattern to draw bars
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    /* One colour for every bar. This was ten hues from schemeCategory10, one
+       per variant, which spent the chart's only free channel restating what the
+       x-axis already labels — and ten is past the eight a categorical palette
+       can hold without two of them becoming indistinguishable under colour
+       blindness. The bar length is the variable; the variant is the axis. */
     barChartGroup
       .selectAll(".bar")
       .data(topRates)
@@ -156,7 +194,7 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       .attr("y", (d) => yScales(d[dataSelectionVar]))
       .attr("width", xScales.bandwidth())
       .attr("height", (d) => chartDimHeight - yScales(d[dataSelectionVar]))
-      .attr("fill", (d) => colorScale(d.variant));
+      .attr("fill", theme.series1);
 
     //Hover tool tips
     var tooltip = d3.select("#tooltip");
@@ -177,13 +215,19 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
         .style("left", event.pageX + "px")
         .style("top", event.pageY + "px")
         .style("opacity", 1);
-    });
+      })
+      //Nothing ever hid the tooltip again, so it stayed on screen at whatever
+      //position it was last given.
+      .on("mouseout", () => tooltip.style("opacity", 0));
 
     //X-Axis Label
     barChartGroup
       .append("text")
-      .attr("x", chartDimWidth / 2 - 30)
+      .attr("x", chartDimWidth / 2)
       .attr("y", chartDimHeight + 100)
+      //text-anchor rather than subtracting a guess at half the label's width:
+      //the offset was tuned per chart and drifts as soon as the text changes.
+      .attr("text-anchor", "middle")
       .style("font-weight", "bold")
       .style("font-family", "Arial")
       .text("Variants");
@@ -276,7 +320,9 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       )
       .attr("cy", (d) => yScales(d.total_deaths))
       .attr("r", 5)
-      .attr("fill", (d) => (d.variant === variantSelection ? "blue" : "gray"))
+      .attr("fill", (d) =>
+        d.variant === variantSelection ? theme.series1 : theme.muted
+      )
       .attr("opacity", (d) => (d.variant === variantSelection ? 1.0 : 0.7));
 
     //Draw the selected variant on top
@@ -292,8 +338,11 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
     //X-Axis Label
     scatterPlotGroup
       .append("text")
-      .attr("x", chartDimWidth / 2 - 50)
+      .attr("x", chartDimWidth / 2)
       .attr("y", chartDimHeight + 50)
+      //Centred on the plot rather than nudged by a fixed offset, which matters
+      //here because this label's text changes with the data-type selector.
+      .attr("text-anchor", "middle")
       .style("font-weight", "bold")
       .style("font-family", "Arial")
       .text(xAxisText);
@@ -311,7 +360,7 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       .text("Total Deaths");
 
     //Hover tool tips
-    var tooltip2 = d3.select("#tooltip");
+    var tooltip2 = d3.select("#tooltip2");
     scatterPlotGroup.selectAll(".circle").on("mouseover", (event, d) => {
       const variantName = d.variant;
       tooltip2
@@ -319,7 +368,8 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
         .style("left", event.pageX + "px")
         .style("top", event.pageY + "px")
         .style("opacity", 1);
-    });
+      })
+      .on("mouseout", () => tooltip2.style("opacity", 0));
   }
 
   //HeatMap Function
@@ -379,7 +429,7 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       .attr("dy", "1.2em")
       .style("font-family", "Arial")
       .style("fill", function (d) {
-        return d === variantSelection ? "blue" : "black";
+        return d === variantSelection ? theme.series1 : theme.muted;
       })
       .style("font-weight", function (d) {
         return d === metricSelection ? "900" : "normal";
@@ -392,26 +442,31 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       .selectAll("text")
       .style("font-family", "Arial")
       .style("fill", function (d) {
-        return d === metricSelection ? "blue" : "black";
+        return d === metricSelection ? theme.series1 : theme.muted;
       });
 
     //X-Axis Label
     heatMapGroup
       .append("text")
-      .attr("x", chartDimWidth / 2 - 30)
+      .attr("x", chartDimWidth / 2)
       .attr("y", chartDimHeight + 100)
+      //text-anchor rather than subtracting a guess at half the label's width:
+      //the offset was tuned per chart and drifts as soon as the text changes.
+      .attr("text-anchor", "middle")
       .style("font-weight", "bold")
       .style("font-family", "Arial")
       .text("Variants");
 
     //Create color scale that uses graident-colors so we can define the "heat" in the heat map
-    //Darker colors indiacte more "heat"
+    //Brighter colors indicate more "heat" — on a dark surface the brightest
+    //cell is the one that stands out, so heat climbs toward the hue rather
+    //than away from it. Each metric keeps its own hue and its own domain.
     const colorScale = {
-      total_deaths: d3.scaleSequential(d3.interpolateBlues),
-      total_cases: d3.scaleSequential(d3.interpolateOranges),
-      mortality_rate: d3.scaleSequential(d3.interpolateGreens),
-      duration: d3.scaleSequential(d3.interpolateReds),
-      growth_rate: d3.scaleSequential(d3.interpolatePurples),
+      total_deaths: d3.scaleSequential(darkRamp(theme.metricHues[0])),
+      total_cases: d3.scaleSequential(darkRamp(theme.metricHues[1])),
+      mortality_rate: d3.scaleSequential(darkRamp(theme.metricHues[2])),
+      duration: d3.scaleSequential(darkRamp(theme.metricHues[3])),
+      growth_rate: d3.scaleSequential(darkRamp(theme.metricHues[4])),
     };
     for (metric of metrics) {
       const parameterValues = heatmapData
@@ -436,7 +491,7 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
       .attr("fill", (d) => colorScale[d.metric](d.value));
 
     //Hover tool tips
-    var tooltip3 = d3.select("#tooltip");
+    var tooltip3 = d3.select("#tooltip3");
     let formatter;
     const valueFormatter = d3.format(".2f");
     const mortalityFormatter = d3.format(".5f");
@@ -451,7 +506,8 @@ d3.csv("surv_variants_cleaned.csv", d3.autoType).then((data) => {
         .style("left", event.pageX + "px")
         .style("top", event.pageY + "px")
         .style("opacity", 1);
-    });
+      })
+      .on("mouseout", () => tooltip3.style("opacity", 0));
   }
 
   //Update Barchart Dynamically

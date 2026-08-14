@@ -1,40 +1,115 @@
+:root {
+  color-scheme: dark;
+
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --axis: #383835;
+  --border: rgba(255, 255, 255, 0.1);
+
+  --series-1: #3987e5;
+
+  --metric-1: #3987e5;
+  --metric-2: #d95926;
+  --metric-3: #199e70;
+  --metric-4: #c98500;
+  --metric-5: #d55181;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
+  background: var(--page);
+  color: var(--text-primary);
 }
 
-.axis path,
-.axis line {
-  stroke: #ccc;
+h1 {
+  font-size: 1.4rem;
+  color: var(--text-primary);
 }
 
-.axis text {
+svg text {
+  fill: var(--text-secondary);
+}
+
+.x-axis path,
+.x-axis line,
+.y-axis path,
+.y-axis line {
+  stroke: var(--axis);
+}
+
+.x-axis text,
+.y-axis text {
+  fill: var(--text-muted);
   font-size: 12px;
 }
 
-.barChartFilters select {
-  margin-right: 20px;
+.selectionControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 12px;
+}
+
+.selectionControls label {
+  color: var(--text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.selectionControls select {
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.selectionControls select:focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 1px;
 }
 
 #dashboard {
   display: flex;
-  gap: 50px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
-#tooltip {
+
+.chartContainer {
+  flex: 1 1 300px;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+
+#tooltip,
+#tooltip2,
+#tooltip3 {
   position: absolute;
+  opacity: 0;
   pointer-events: none;
-  background: rgba(32, 33, 41, 0.8);
-  color: white;
-  font-weight: lighter;
-  padding: 2px 4px;
+  background: #2c2c2a;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
   font-size: 14px;
 }
 
 svg {
   width: 100%;
-  height: 400px;
+  height: auto;
 }
 
 .seperateTitleControls {

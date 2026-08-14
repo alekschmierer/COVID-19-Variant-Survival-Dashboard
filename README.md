@@ -44,9 +44,25 @@ The three visualizations are **interconnected**, allowing users to explore patte
 
 > Data was preprocessed and cleaned in Python, then exported to CSV for visualization.
 
+## Live Demo
+
+**[alekschmierer.github.io/COVID-19-Variant-Survival-Dashboard](https://alekschmierer.github.io/COVID-19-Variant-Survival-Dashboard/)**
+
+No install, no build step, no server. D3 is vendored into the repo, so the page has no external dependencies at runtime.
+
 ## Running Locally
 
-Because this project loads a CSV file using `d3.csv()`, it must be run from a local web server (not directly opened as a file).
+Serve the repo root over HTTP — `python3 -m http.server`, then open `http://localhost:8000`. (Opening `index.html` straight off the filesystem will not work: browsers block `d3.csv()` on `file://` under CORS.)
 
-### Option : Install the "Live Server" extension in VSCode
+## Project Structure
+
+```
+index.html                     the page
+script.js                      all three charts
+style.css                      all styling
+surv_variants_cleaned.csv      the cleaned dataset, loaded at runtime
+d3.v7.min.js                   vendored D3 v7
+Data_Cleaning_Python_Final/    the cleaning notebook and the raw CSV
+Preview_Dashboard_Image.png    the screenshot above
+```
 
